@@ -63,7 +63,8 @@ Input.method("showResponse", function(responseText, statusText, xhr, $form){
     data[0] = data[0].replaceAll(' xmlns="http://clafer.org/ir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cl="http://clafer.org/ir" schemaLocation="http://clafer.org/ir https://github.com/gsdlab/clafer/blob/master/src/ClaferIR.xsd"', '');
 
     var unsat = false;
-    var errorData = this.checkForCommonErrors(data[1]);
+    if (data[1])
+        var errorData = this.checkForCommonErrors(data[1]);
     if(errorData.indexOf("No more instances found") != -1 || errorData == "N"){ //unsat must display near miss on table, requires slightly different handling
         $('#waitText').hide();
         $('#InputForm').show();
@@ -87,6 +88,8 @@ Input.method("showResponse", function(responseText, statusText, xhr, $form){
     $('#waitText').hide();
     $('#InputForm').show();
     $('#ControlForm').show();
+
+    data[1] = $.parseJSON(data[1]);
 
 	this.host.updateClaferData(data);
 

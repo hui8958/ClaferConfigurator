@@ -80,20 +80,16 @@ server.post('/uploads', function(req, res){
 				var d = new Date();
 				var obj = { windowKey: req.body.windowKey, tool: null, freshData: "", folder: dlDir, file: upFilePath, lastUsed: d, error: ""};
 				if (req.body.bitwidth != ""){
-					var args = [upFilePath, "--bitwidth=" + req.body.bitwidth, "--adduidsandtypes"];
+					var args = [upFilePath, "--bitwidth=" + req.body.bitwidth, "--json"];
 				} else {
-					var args = [upFilePath, "--adduidsandtypes"];
+					var args = [upFilePath, "--json"];
 				}
 //				console.log(args);
 				tool = spawn("claferIG", args);
 				obj.tool = tool;
 				processes.push(obj);
 				tool.stdout.on("data", function (data){
-	//				console.log("/*****************\nGetting data\n*************/")
 					for (var i = 0; i<processes.length; i++){
-	//					console.log(processes.length)
-	//					console.log(i);
-	//					console.log("stuck in post loop")
 						if (processes[i].windowKey == req.body.windowKey){
 							if (!resEnded){
 								claferXML = claferXML.replace(/[^<]{1,}/m, '');
@@ -114,7 +110,6 @@ server.post('/uploads', function(req, res){
 						if (processes[i].windowKey == req.body.windowKey){
 							if (!resEnded){
 								res.writeHead(200, { "Content-Type": "text/html"});
-								claferXML = claferXML.replace(/[^<]{1,}/m, '');
 								res.end(claferXML + "=====" + data);
 								resEnded = true;
 							} else{

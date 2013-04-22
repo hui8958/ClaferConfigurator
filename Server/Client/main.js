@@ -93,7 +93,7 @@ function Host(modules)
 
 Host.method("updateData", function(data){
     data.consoleOut = data.consoleOut.replaceAll("undefined", "");
-    if (data.instancesXML != '' && data.claferXML != ''){
+    if (data.instancesJSON != '' && data.claferXML != ''){
         for (var i = 0; i < this.modules.length; i++)
         {
             if (this.modules[i].onDataLoaded)
@@ -127,9 +127,8 @@ Host.method("updateClaferData", function(data){
     this.data.claferXML = data[0];
     this.data.instancesData = data[1];
     this.data.qualities = data[2];
-    this.data.instancesXML = new InstanceConverter(this.data.instancesData).convertFromClaferIGOutputToClaferMoo(this.data.instancesData);
-    this.data.instancesXML = new InstanceConverter(this.data.instancesXML).convertFromClaferMooOutputToXML(); 
-    this.data.instancesXML = this.data.instancesXML.replaceAll('<?xml version="1.0"?>', '');
+    this.data.instancesJSON = [this.data.instancesData];
+
 
     console.log(this.data)
     this.updateData(this.data);
@@ -139,10 +138,11 @@ Host.method("updateInstanceData", function(data, overwrite, consoleOut){
     if (overwrite){
         this.data.instancesData = "";
     }
-    this.data.instancesData += data;
-    this.data.instancesXML = new InstanceConverter(this.data.instancesData).convertFromClaferIGOutputToClaferMoo(this.data.instancesData);
-    this.data.instancesXML = new InstanceConverter(this.data.instancesXML).convertFromClaferMooOutputToXML(); 
-    this.data.consoleOut = consoleOut;
+    this.data.instancesJSON = this.data.instancesJSON.concat(data);
+ //   this.data.instancesData += data;
+ //   this.data.instancesXML = new InstanceConverter(this.data.instancesData).convertFromClaferIGOutputToClaferMoo(this.data.instancesData);
+ //   this.data.instancesXML = new InstanceConverter(this.data.instancesXML).convertFromClaferMooOutputToXML(); 
+//    this.data.consoleOut = consoleOut;
 
     console.log(this.data)
     this.updateData(this.data);

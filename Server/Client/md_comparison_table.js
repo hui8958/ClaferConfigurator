@@ -25,11 +25,11 @@ function ComparisonTable(host)
 }
 
 ComparisonTable.method("onDataLoaded", function(data){
-    this.instanceProcessor = new InstanceProcessor(data.instancesXML);
+    this.instanceProcessor = new InstanceProcessor(data.instancesJSON);
     this.processor = new ClaferProcessor(data.claferXML, data.qualities);
     this.abstractClaferOutput = "";    
     this.toggled = false;
-    this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this, data.qualities)
+    this.filter = new tableFilter("comparison", data.claferXML, data.instancesJSON, this, data.qualities)
 
     this.dataTable = this.getDataTable();   
     

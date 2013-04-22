@@ -1,35 +1,20 @@
 // Instance Processor is used to work with sets of configurations presented as XML
 
-function InstanceProcessor (sourceXML) {
-    this.source = (new XMLHelper()).stringToXML(sourceXML);
-    this.xmlHelper = new XMLHelper();
+function InstanceProcessor (sourceJSON) {
+    this.source = sourceJSON;
 }
 
 // returns the number of instances in the set
 InstanceProcessor.method("getInstanceCount", function() 
 {
-	var elements = this.source.getElementsByTagName("instance");
-	if (elements == null)
-		return 0;
-		
-	return elements.length;
+	return this.source.length;
 });
 
 // returns the base abstract clafer of all instances (they should have the same base abstract clafer)
 
 InstanceProcessor.method("getInstanceSuperClafer", function() 
 {
-	try
-	{
-		var rootClafer = this.xmlHelper.queryXML(this.source, "/instances/instance/clafer/super[1]")[0].firstChild.nodeValue;
-	}
-	catch(e)
-	{
-		alert("Could not get a super clafer of the instance root");
-		return "";
-	}
-	
-	return rootClafer;
+	return this.source[0].elements[0].uid;
 });
 
 
@@ -40,32 +25,15 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, featureName,
 {
 	try
 	{
-        var clafers = this.xmlHelper.queryXML(this.source, 'instances/instance[' + instanceIndex + ']' + '//clafer[@id="' + featureName + '"]');
-		if (clafers.length == 1)
+        var found = this.findFeature(this.source[instanceIndex - 1], featureName);
+
+		if (found == 1)
 		{	
 			var result;
 			if (forceNumeric)
 				result = 1;
 			else
 				result = "yes";			
-		
-			for (var i = 0; i < clafers[0].childNodes.length; i++)
-			{
-				var current = clafers[0].childNodes[i];
-
-				if (current.tagName == "value")
-				{
-					if (current.firstChild)
-					{
-						result = current.firstChild.nodeValue;
-						if (forceNumeric)
-							result = parseInt(result);
-					}
-					
-					break;
-				}
-			}
-			
 			return result;
 		}
 		else
@@ -84,32 +52,21 @@ InstanceProcessor.method("getFeatureValue", function(instanceIndex, featureName,
 		
 });
 
-/* Old function -- returns shape of instance --could be useful later so left in
-InstanceProcessor.method("getInstanceShape", function(id, goals, originalPoints){
-    if (id>originalPoints){
-	    var values={};
-    	for (var i=0; i<goals.length; i++){
-    	    values[goals[i].arg] = this.getFeatureValue(id, goals[i].arg, true);
-    	}
-    	for (i=1; i<=originalPoints; i++){
-    	    var isOptimal = true;
-    	    for (j=0; j<goals.length; j++){
-    	        var check =  this.getFeatureValue(i, goals[j].arg, true);
-    	        if (check != values[goals[j].arg]){
-    	            isOptimal = false;
-    	            break;
-    	        }
-        	}
-        	if (isOptimal)
-        	    return "\u2B22";//returns hexagon
-    	}
-    	return "\u25A0";//returns square
-    } else
-    	return "\u25CF";//returns circle
-});
-*/
+InstanceProcessor.method("findFeature", function(root, name){
+ 	for(var i=0; i<root.elements.length; i++){
+ 		if (root.elements[i].ident == name)
+ 			return 1;
+ 		else {
+ 			var found = this.findFeature(root.elements[i], name);
+ 			if (found == 1)
+ 				return 1;
+ 		}
+ 	}
+ 	return 0;
 
-//returns the id of the first identical point that is a circle.
+});
+
+//returns the index of the first identical point that is a circle.
 InstanceProcessor.method("getIdenticalID", function(id, goals, originalPoints){
    	if (id>originalPoints){
     	var values={};
@@ -134,11 +91,9 @@ InstanceProcessor.method("getIdenticalID", function(id, goals, originalPoints){
 
 InstanceProcessor.method("getInstanceName", function(){
 	try {
-		var ClaferId = this.xmlHelper.queryXML(this.source, "/instances/instance/clafer/@id");
+		return this.source[0].elements[0].ident;
 	} catch(e) {
 		alert("Could not get a clafer id of the instance root");
 		return "";
 	}
-	
-	return ClaferId[0].nodeValue;
 });

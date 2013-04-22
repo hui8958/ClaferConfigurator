@@ -1,9 +1,9 @@
-function tableFilter(tableid, claferXML, instancesXML, host, qualities){
+function tableFilter(tableid, claferXML, instancesJSON, host, qualities){
 	this.host = host;
 	this.tableid = "#" + tableid;
 	this.hidden = [];
 	this.processor = new ClaferProcessor(claferXML, qualities);
-	this.instanceProcessor = new InstanceProcessor(instancesXML);
+	this.instanceProcessor = new InstanceProcessor(instancesJSON);
 	this.permahidden = [];
 	this.closedFeatures = [];
 }

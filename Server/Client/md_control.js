@@ -25,7 +25,7 @@ Control.method("getInitContent", function(){
     ret += '<div id="ContWaitingDiv" style="display:none"><Progress id="getProgress" style="width:100%"></Progress></div>';
 	
 
-    this.data = "";
+    this.data = [];
     this.error = "";
     this.overwrite = false;
 
@@ -67,7 +67,7 @@ Control.method("onInitRendered", function()
 });
 
 Control.method("onDataLoaded", function(data){
-    $("#superClafer").val((new InstanceProcessor(data.instancesXML)).getInstanceName().replace(/c[0-9]{1,}_/g, ""));
+    $("#superClafer").val((new InstanceProcessor(data.instancesJSON)).getInstanceName().replace(/c[0-9]{1,}_/g, ""));
 });
 
 Control.method("beginQuery", function(formData, jqForm, options){
@@ -98,7 +98,7 @@ Control.method("showResponse", function(responseText, statusText, xhr, $form){
     }
     else {
 //        console.log(responseText);
-        this.data += data[0];
+        this.data.push($.parseJSON(data[0].replaceAll("claferIG> ", "")));
     }
 
 
@@ -109,10 +109,9 @@ Control.method("showResponse", function(responseText, statusText, xhr, $form){
         $("#getProgress").attr("value", ($("#getProgress").attr("value") + 1));
         $("#ControlForm").submit();
     } else {
-        this.data = this.data.replaceAll("claferIG> ", "");  
         this.host.updateInstanceData(this.data, this.overwrite, this.error);
         this.error = "";
-        this.data = "";
+        this.data = [];
         this.overwrite = false
     }
 
