@@ -137,6 +137,7 @@ Host.method("updateClaferData", function(data){
 Host.method("updateInstanceData", function(data, overwrite, consoleOut){
     if (overwrite){
         this.data.instancesData = "";
+        this.data.instancesJSON = [];
     }
     this.data.instancesJSON = this.data.instancesJSON.concat(data);
  //   this.data.instancesData += data;

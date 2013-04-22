@@ -14,7 +14,7 @@ InstanceProcessor.method("getInstanceCount", function()
 
 InstanceProcessor.method("getInstanceSuperClafer", function() 
 {
-	return this.source[0].elements[0].uid;
+	return this.source[0].elements[0].super;
 });
 
 
@@ -63,7 +63,6 @@ InstanceProcessor.method("findFeature", function(root, name){
  		}
  	}
  	return 0;
-
 });
 
 //returns the index of the first identical point that is a circle.
