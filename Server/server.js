@@ -9,7 +9,7 @@ processes = [];
 
 var port = 5003;
 
-var toolpath = __dirname + "/claferIg/claferIG"
+var toolpath = __dirname + "/claferIG/claferIG"
 
 var server = express();
 server.use(express.cookieParser('asasdhf89adfhj0dfjask'));
@@ -46,11 +46,14 @@ server.post('/uploads', function(req, res){
 		if (err) throw err;
 		var dlDir = upFilePath;
 		upFilePath += pathTokens[2];
+		console.log("moving file from" + oldPath + " to " + upFilePath);
 		fs.rename(oldPath, upFilePath, function (err){
 			if (err) throw err;
+			console.log("proceeding with " + upFilePath)
 			var util  = require('util');
 			spawn = require('child_process').spawn;
-			var obj = { windowKey: req.body.windowKey, tool: null, freshData: "", folder: dlDir};
+			var d = new Date();
+			var obj = { windowKey: req.body.windowKey, tool: null, freshData: "", folder: dlDir, lastUsed: d};
 			tool = spawn("claferIG", [upFilePath , "--bitwidth=" + req.body.bitwidth], { stdio: ["pipe", "pipe", process.stderr, "pipe", "pipe"]});
 			obj.tool = tool;
 			processes.push(obj);
@@ -62,32 +65,17 @@ server.post('/uploads', function(req, res){
 					if (processes[i].windowKey == req.body.windowKey){
 						processes[i].freshData += data
 						if (!resEnded){
+							resEnded = true;
 							res.writeHead(200, { "Content-Type": "text/html"});
 							res.end(data);
-							resEnded = true;
 							processes[i].freshData = '';
 							processes[i].tool.stdout.removeAllListeners("data");
 						}
 					}
 				}
 			});
-			tool.on('exit', function (code){
-				for (var i = 0; i<processes.length; i++){
-					if (processes[i].windowKey == req.body.windowKey){
-						processes.splice(i, 1);
-						if (!resEnded){
-							console.log("closing process")
-							res.writeHead(200, { "Content-Type": "text/html"});
-							res.send(code);
-							res.end("closing process");
-							resEnded = true;
-						}
-					}
-				}
-			});
 		});
 	});
-
 });
 
 server.get('/Control', function(req, res){
@@ -95,6 +83,8 @@ server.get('/Control', function(req, res){
 	var resEnd = false;
 	for (var y = 0; y<this.processes.length; y++){
 		if (processes[y].windowKey == req.query.windowKey){
+			var d = new Date();
+			processes[y].lastUsed = d;
 			var CurProcess = processes[y];
 			if (req.query.operation == "next"){
 				CurProcess.tool.stdin.write("n\n", function(){
@@ -126,10 +116,11 @@ server.get('/Control', function(req, res){
 	}
 });
 
-closeProcess = function(Key){
+function closeProcess(Key){
 	for (var y = 0; y<this.processes.length; y++){
-		console.log(y);
+		console.log(processes[y].windowKe + " // " + Key)
 		if (processes[y].windowKey == Key){
+			console.log("closing process");
 			var toDelete = processes[y];
 			toDelete.tool.removeAllListeners("exit");
 			toDelete.tool.stdin.write("q\n");
@@ -179,6 +170,17 @@ function deleteOld(path){
 	}
 }
 
+function ProcessCleaner(){
+	var Cleaner = setInterval(function(){
+		for (var i = 0; i<processes.length; i++){
+			var d = new Date();
+			if((d-processes[i].lastUsed)>600000){
+				closeProcess(processes[i].windowKey);
+			}
+		}
+	}, 600000);
+}
+
 /*
  * Catch all. error reporting for unknown routes
  */
@@ -188,6 +190,7 @@ server.use(function(req, res, next){
 
 server.listen(port);
 console.log('ClaferConfigurator listening on port ' + port);
+ProcessCleaner();
 
 var getkeys = function(obj){
 		var keys = [];
