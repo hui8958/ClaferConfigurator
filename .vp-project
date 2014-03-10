@@ -1,0 +1,13 @@
+ClaferConfigurator : ClaferWebTool
+    server
+        backends
+            ClaferIG
+        processManagement            
+    client
+        jquery
+		JSClass
+        views
+			input
+			output
+			control
+	processManagement
