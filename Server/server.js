@@ -115,7 +115,7 @@ server.get('/Control', function(req, res){
 		}
 	}
 });
-
+//&begin [processCleaner]
 function closeProcess(Key){
 	for (var y = 0; y<this.processes.length; y++){
 		console.log(processes[y].windowKe + " // " + Key)
@@ -129,7 +129,8 @@ function closeProcess(Key){
 		}
 	}
 }
-
+//&end [processCleaner]
+//&begin [cleanOldFiles] 
 function finishCleanup(dir, results){
 	if (fs.existsSync(dir)){
 		fs.rmdir(dir, function (err) {
@@ -138,7 +139,7 @@ function finishCleanup(dir, results){
 		});
 	}
 }
- 
+
 function cleanupOldFiles(dir) {
 
 	//cleanup old files
@@ -169,7 +170,8 @@ function deleteOld(path){
 		});
 	}
 }
-
+//&end [cleanOldFiles]
+//&begin [processCleaner]
 function ProcessCleaner(){
 	var Cleaner = setInterval(function(){
 		for (var i = 0; i<processes.length; i++){
@@ -180,7 +182,7 @@ function ProcessCleaner(){
 		}
 	}, 600000);
 }
-
+//&end [processCleaner]
 /*
  * Catch all. error reporting for unknown routes
  */

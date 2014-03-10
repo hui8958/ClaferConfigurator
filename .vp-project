@@ -1,13 +1,15 @@
-ClaferConfigurator : ClaferWebTool
+ClaferConfigurator
     server
         backends
             ClaferIG
-        processManagement            
+		cleanOldFiles
     client
         jquery
 		JSClass
         views
 			input
+				handleError
 			output
 			control
 	processManagement
+		processCleaner

@@ -46,7 +46,8 @@ Input.method("showResponse", function(responseText, statusText, xhr, $form){
     $('#ControlForm').show();
 	host.updateData(responseText);
 });
-
+//&begin [handleError]
 Input.method("handleError", function(responseText, statusText, xhr, $form){
 
 });
+//&end [handleError]
