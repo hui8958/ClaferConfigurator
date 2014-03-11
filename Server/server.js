@@ -59,8 +59,12 @@ server.post('/uploads', function(req, res){
 			});
 			claferCall.on("close", function (code){
 //				console.log("first call complete");
+				if (code != 0){
+					res.writeHead(400, { "Content-Type": "text/html"});
+					res.end("Clafer failed to process the file")
+				}
 				var d = new Date();
-				var obj = { windowKey: req.body.windowKey, tool: null, freshData: "", folder: dlDir, lastUsed: d, error: ""};
+				var obj = { windowKey: req.body.windowKey, tool: null, freshData: "", folder: dlDir, file: upFilePath, lastUsed: d, error: ""};
 				if (req.body.bitwidth != ""){
 					var args = [upFilePath, "--bitwidth=" + req.body.bitwidth, "--adduidsandtypes"];
 				} else {
@@ -96,6 +100,7 @@ server.post('/uploads', function(req, res){
 	//					console.log(i);
 						if (processes[i].windowKey == req.body.windowKey){
 							if (!resEnded){
+								res.writeHead(200, { "Content-Type": "text/html"});
 								claferXML = claferXML.replace(/[^<]{1,}/m, '');
 								res.end(claferXML + "=====" + data);
 								resEnded = true;
@@ -110,7 +115,11 @@ server.post('/uploads', function(req, res){
 						if (processes[i].windowKey == req.body.windowKey){
 							console.log(processes[i].error)
 							cleanupOldFiles(processes[i].folder);
-							processes.splice(i, 1);	
+							processes.splice(i, 1);
+							if (!resEnded){
+								res.writeHead(400, { "Content-Type": "text/html"});
+								res.end(processes[i].error)
+							}	
 						}
 					}
 				});
@@ -156,6 +165,15 @@ server.get('/Control', function(req, res){
 		}
 	}
 });
+
+server.post('/constraint', function(req, res){
+	for (var i = 0; i<processes.length; i++){
+		if (processes[i].windowKey == req.body.windowKey){
+			fs.readFileSync(processes[i].file)
+		}
+	}
+});
+
 //&begin [processCleaner]
 function closeProcess(Key){
 	for (var y = 0; y<this.processes.length; y++){

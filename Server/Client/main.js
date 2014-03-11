@@ -75,47 +75,57 @@ function Host(modules)
 }
 
 Host.method("updateData", function(data){
+    data.consoleOut = data.consoleOut.replaceAll("undefined", "");
+    if (data.instancesXML != '' && data.claferXML != ''){
+        for (var i = 0; i < this.modules.length; i++)
+        {
+            if (this.modules[i].onDataLoaded)
+                this.modules[i].onDataLoaded(data);
+        }
 
+        for (var i = 0; i < this.modules.length; i++)
+        {
+            if (this.modules[i].getContent)
+                $.updateWindowContent(this.modules[i].id, this.modules[i].getContent());
 
-    for (var i = 0; i < this.modules.length; i++)
-    {
-        if (this.modules[i].onDataLoaded)
-            this.modules[i].onDataLoaded(data);
-    }
-
-    for (var i = 0; i < this.modules.length; i++)
-    {
-        if (this.modules[i].getContent)
-            $.updateWindowContent(this.modules[i].id, this.modules[i].getContent());
-
-        if (this.modules[i].onRendered)
-            this.modules[i].onRendered();
-            
-        if (this.modules[i].resize)
-            this.modules[i].resize();
+            if (this.modules[i].onRendered)
+                this.modules[i].onRendered();
                 
+            if (this.modules[i].resize)
+                this.modules[i].resize();
+                    
+        }
+    } else {
+        $.updateWindowContent("mdOutput", data.consoleOut);
     }
 });
 
 Host.method("updateClaferData", function(data){
-    console.log(data);
-    console.log(this.data)
+    this.data.consoleOut = "";
     this.data.claferXML = data[0];
     this.data.instancesData = data[1];
     this.data.instancesXML = new InstanceConverter(this.data.instancesData).convertFromClaferIGOutputToClaferMoo(this.data.instancesData);
     this.data.instancesXML = new InstanceConverter(this.data.instancesXML).convertFromClaferMooOutputToXML(); 
     this.data.instancesXML = this.data.instancesXML.replaceAll('<?xml version="1.0"?>', '');
+
     console.log(this.data)
     this.updateData(this.data);
 });
 
-Host.method("updateErrorData", function(data){
-    $.updateWindowContent("mdOutput", data);
-});
-
-Host.method("updateInstanceData", function(data){
+Host.method("updateInstanceData", function(data, overwrite, consoleOut){
+    if (overwrite){
+        this.data.instancesData = "";
+    }
     this.data.instancesData += data;
     this.data.instancesXML = new InstanceConverter(this.data.instancesData).convertFromClaferIGOutputToClaferMoo(this.data.instancesData);
     this.data.instancesXML = new InstanceConverter(this.data.instancesXML).convertFromClaferMooOutputToXML(); 
+    this.data.consoleOut += consoleOut;
+    this.updateData(this.data);
+
+});
+
+Host.method("consoleUpdate", function(data){
+    console.log(data);
+    this.data.consoleOut = data;
     this.updateData(this.data);
 });

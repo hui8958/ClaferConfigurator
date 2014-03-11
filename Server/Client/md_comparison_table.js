@@ -3,10 +3,10 @@ function ComparisonTable(host)
     this.id = "mdComparisonTable";
     this.title = "Feature and Quality Matrix";
 
-    this.width = 600;
-    this.height = 200;
+    this.width = 800;
+    this.height = 492;
     this.posx = 0;
-    this.posy = 92;
+    this.posy = 110;
     
     this.host = host;
 
@@ -176,33 +176,39 @@ ComparisonTable.method("onRendered", function(){
                     that.filter.filterContent();
                 }
             }).css("cursor", "pointer");
+        } 
+        //  Add Greyed out checkboxes to denote effectively mandatory features
+        else if (!row.find(".numeric").length && row.find(".EffectMan").length){
+            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="images/checkbox_ticked_greyed.png" class="wanted">');
         }
         i++;
         row = $("#r" + i);
     }
   //&end [contentFilter]
 //  Add collapse buttons for features with children
+    var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
+    var abstractClaferTree = this.processor.getAbstractClaferTree("/Module/Declaration/UniqueId", instanceSuperClafer);
+    var hasChild = this.processor.getFeaturesWithChildren(abstractClaferTree)
     i = 1;
     row = $("#r" + i);
     var that = this;
     while (row.length != 0){
         if (!row.find(".numeric").length){
-            $("#r" + i + " .td_abstract").prepend('<text id="r' + i + 'collapse" status="false">\u25BC<text>')
-            $("#r" + i + "collapse").click(function(){
-                if ($(this).attr("status") === "false"){
-                    that.filter.closeFeature($(this).parent().text().replaceAll(/[^A-z]/g, ''));
-                    $(this).attr("status", "true")
-                    $(this).text("\u25B6")
-                } else {
-                    that.filter.openFeature($(this).parent().text().replaceAll(/[^A-z]/g, ''));
-                    $(this).attr("status", "false")
-                    $(this).text("\u25BC")
-                }
-            }).css("cursor", "pointer");
-        }
-//  Add Greyed out checkboxes to denote effectively mandatory features
-        else if (!row.find(".numeric").length){
-            $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="images/checkbox_ticked_greyed.png" class="wanted">');
+            var feature = $("#r" + i + " .td_abstract").text().replaceAll(/[\s?]{1,}/g, '');
+            if (hasChild.indexOf(feature) != -1){
+                $("#r" + i + " .td_abstract").append('<text id="r' + i + 'collapse" status="false">   \u21B4<text>')
+                $("#r" + i + "collapse").click(function(){
+                    if ($(this).attr("status") === "false"){
+                        that.filter.closeFeature($(this).parent().text().replaceAll(/[^A-z]/g, ''));
+                        $(this).attr("status", "true")
+                        $(this).text("   \u2192")
+                    } else {
+                        that.filter.openFeature($(this).parent().text().replaceAll(/[^A-z]/g, ''));
+                        $(this).attr("status", "false")
+                        $(this).text("   \u21B4")
+                    }
+                }).css("cursor", "pointer");
+            }
         }
 //  Add sorting to quality attributes
       //&begin [sortingByQuality,sorting]
@@ -458,16 +464,6 @@ ComparisonTable.method("toggleDistinct", function()
     return true;
 });
 
-
-//makes instance red on graph, for actual selection function see onSelected(pid) in selector.js
-ComparisonTable.method("makePointsSelected", function (pid){;
-    $("#mdComparisonTable #th0_" + pid.substring(1)).find("text").css("fill", "Red");
-});
-
-//makes instance red on graph, for actual deselection function see onDeselected(pid) in selector.js
-ComparisonTable.method("makePointsDeselected", function (pid){
-    $("#mdComparisonTable #th0_" + pid.substring(1)).find("text").css("fill", "Black");
-});
 //&begin [searchBar]
 ComparisonTable.method("scrollToSearch", function (input){
     //method name is from before. doesn't actually scroll... hides rows not containing input.
