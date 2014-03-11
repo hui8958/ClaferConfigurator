@@ -7,9 +7,13 @@ ClaferConfigurator
         jquery
 		JSClass
         views
+			featureAndQualityMatrix
 			input
 				handleError
 			output
 			control
+		instanceProcessor
+		claferProcessor
+		dataTable
 	processManagement
 		processCleaner
