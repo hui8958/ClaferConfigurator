@@ -40,14 +40,14 @@ tableFilter.method("filterContent", function (){
  	for(i=0; i<this.closedFeatures.length; i++){
  		this.closeFeature(this.closedFeatures[i]);
  	}
-
+ 	//&begin [removeInstance]
  	//permanently hidden instances (removed)
  	if(this.permahidden != []){
 	 	for(i=0;i<this.permahidden.length;i++){
 	 		$(this.permahidden[i]).hide();
 	 	}
  	}
-
+ 	//&end [removeInstance]
  	this.host.scrollToSearch($("#search").val());
 });
 
@@ -160,7 +160,7 @@ tableFilter.method("cleanFilters", function (){
  			$("#r" + i + "box").attr("src", "images/checkbox_empty.bmp");
  	}
 });
-
+//&begin [removeInstance]
 tableFilter.method("removeInstance", function(instanceNum){
 	$("#th0_" + instanceNum).hide();
 	this.permahidden.push("#th0_" + instanceNum);
@@ -172,3 +172,4 @@ tableFilter.method("removeInstance", function(instanceNum){
 	this.host.permahidden = this.permahidden;
 
 });
+//&end [removeInstance]
