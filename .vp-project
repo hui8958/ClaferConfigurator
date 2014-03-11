@@ -17,6 +17,7 @@ ClaferConfigurator
 				handleError
 			output
 			control
+			constraints
 		instanceProcessor
 		claferProcessor
 		ListVisualizer
