@@ -72,7 +72,7 @@ ComparisonTable.method("onRendered", function(){
             this.toggleDistinct(); //one to reapply it
         }
     }).css("cursor", "pointer");
-//&begin [removeInstance]
+  //&begin [removeInstance]
 //  Add remove buttons to instances
     var instances = $("#comparison #r0").find(".td_instance");
     for (i=0; i<$(instances).length; i++){
@@ -94,7 +94,7 @@ ComparisonTable.method("onRendered", function(){
             $(this).attr("src", "images/remove.png");
         });      
     }
-//&end [removeInstance]
+  //&end [removeInstance]
 //************************* Most of the following is to get proper formatting on the table  *******************
 
 // Move headers into new div
@@ -209,7 +209,7 @@ ComparisonTable.method("onRendered", function(){
         i++;
         row = $("#r" + i);
     }
-  //&end [contentFilter]
+    //&end [contentFilter]
 //  Add collapse buttons for features with children
     var instanceClaferName = this.instanceProcessor.getInstanceName();
     var abstractClaferTree = this.processor.getAbstractClaferTree("/Module/Declaration/UniqueId", instanceClaferName);
@@ -235,8 +235,8 @@ ComparisonTable.method("onRendered", function(){
                 }).css("cursor", "pointer");
             }
         }
-//  Add sorting to quality attributes
       //&begin [sortingByQuality,sorting]
+//  Add sorting to quality attributes      
         else {
             $("#r" + i + " .td_abstract").append('<div id=sortText style="display:inline"></div>');
             $("#r" + i + " .td_abstract").addClass('noSort');
@@ -276,7 +276,7 @@ ComparisonTable.method("onRendered", function(){
         }
         that.rowSort($(this).text());
     }).css("cursor", "pointer");
-  //&end [sortingByID,sorting]
+    //&end [sortingByID,sorting]
 // add handler to search bar
     that = this;
     $('#search').keyup(function(){
@@ -321,9 +321,11 @@ ComparisonTable.method("collector", function(clafer, spaceCount)
 ComparisonTable.method("traverse", function(clafer, level)
 {
 	this.collector (clafer, level);
-	for (var i = 0; i < clafer.subclafers.length; i++)
-	{
-		this.traverse(clafer.subclafers[i], level + 1);
+	if (clafer.subclafers != null){
+		for (var i = 0; i < clafer.subclafers.length; i++)
+		{
+			this.traverse(clafer.subclafers[i], level + 1);
+		}
 	}
 });
 
@@ -491,7 +493,6 @@ ComparisonTable.method("toggleDistinct", function()
     this.scrollToSearch($("#search").val());
     return true;
 });
-
 //&begin [searchBar]
 ComparisonTable.method("scrollToSearch", function (input){
     //method name is from before. doesn't actually scroll... hides rows not containing input.
