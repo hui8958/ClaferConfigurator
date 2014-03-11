@@ -133,7 +133,7 @@ Host.method("updateInstanceData", function(data, overwrite, consoleOut){
 
         console.log(this.data)
         this.updateData(this.data);
-    } else {
+    } else if (overwrite){
         alert("Table requires at least one instance.");
     }
 
@@ -184,12 +184,10 @@ Host.method("changeConstraint", function(feature, require){
     }
 });
 
-Host.method("removeInstance", function(instanceNum, instanceName){
-    var data = this.data.instancesData.split(instanceName);
-    data.splice(instanceNum, 1);
-    var newData = ""
-    for (var i=1; i<data.length; i++){
-        newData += instanceName + data[i];
+Host.method("clearFilters", function(){
+    for (var i = 0; i < this.modules.length; i++){
+        if (this.modules[i].id == "mdComparisonTable"){
+            this.modules[i].clearFilters();
+        }
     }
-    this.updateInstanceData(newData, true, "");
 });

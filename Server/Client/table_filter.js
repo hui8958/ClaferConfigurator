@@ -4,6 +4,7 @@ function tableFilter(tableid, claferXML, instancesXML, host, qualities){
 	this.hidden = [];
 	this.processor = new ClaferProcessor(claferXML, qualities);
 	this.instanceProcessor = new InstanceProcessor(instancesXML);
+	this.permahidden = [];
 	this.closedFeatures = [];
 }
 
@@ -13,6 +14,7 @@ tableFilter.method("onRendered", function(){
 
 tableFilter.method("filterContent", function (){
 	this.showAll();
+	this.saveFilters();
 	//filter by features
  	for (var i=0;i<this.rows.length;i++){
  		var curRow = this.rows[i];
@@ -38,6 +40,14 @@ tableFilter.method("filterContent", function (){
  	for(i=0; i<this.closedFeatures.length; i++){
  		this.closeFeature(this.closedFeatures[i]);
  	}
+
+ 	//permanently hidden instances (removed)
+ 	if(this.permahidden != []){
+	 	for(i=0;i<this.permahidden.length;i++){
+	 		$(this.permahidden[i]).hide();
+	 	}
+ 	}
+
  	this.host.scrollToSearch($("#search").val());
 });
 
@@ -103,7 +113,45 @@ tableFilter.method("openFeature", function (feature){
 	this.filterContent();
 });
 
-tableFilter.method("resetFilters", function (){
+tableFilter.method("resetFilters", function (filters, permahidden){
+	if(filters != []){
+		for (var i=1;i<this.rows.length;i++){
+			var curRow = this.rows[i];
+			$(curRow).attr("FilterStatus", filters[i]);
+			if ($("#r" + i + "box").length > 0){
+				if ($("#r" + i + "box").attr("src").indexOf("images/checkbox_ticked_greyed.png") == -1){
+					if (filters[i] == "none")
+						$("#r" + i + "box").attr("src", "images/checkbox_empty.bmp");
+					else if (filters[i] == "require")
+						$("#r" + i + "box").attr("src", "images/checkbox_ticked.bmp");
+					else if (filters[i] == "exclude")
+						$("#r" + i + "box").attr("src", "images/checkbox_x.bmp");
+				}
+			}
+		}
+ 	}
+ 	this.permahidden = permahidden;
+ 	//fires to realign headers
+ 	this.host.scrollToSearch("");
+});
+
+tableFilter.method("saveFilters", function(){
+	var filters = ["none"];
+	for (var i=1;i<this.rows.length;i++){
+ 		var curRow = this.rows[i];
+ 		var filter = $(curRow).attr("FilterStatus")
+ 		if (filter == "none"){
+ 			filters.push("none");
+ 		} else if (filter == "require"){
+			filters.push("require");
+	 	} else if (filter == "exclude"){
+			filters.push("exclude");
+	 	}
+ 	}
+ 	this.host.SavedFilters = filters;
+});
+
+tableFilter.method("cleanFilters", function (){
 	this.showAll();
  	for (var i=1;i<this.rows.length;i++){
  		var curRow = this.rows[i];
@@ -111,4 +159,16 @@ tableFilter.method("resetFilters", function (){
  		if ($("#r" + i + "box").attr("src").indexOf("images/checkbox_ticked_greyed.png") == -1)
  			$("#r" + i + "box").attr("src", "images/checkbox_empty.bmp");
  	}
+});
+
+tableFilter.method("removeInstance", function(instanceNum){
+	$("#th0_" + instanceNum).hide();
+	this.permahidden.push("#th0_" + instanceNum);
+
+	for (var i=0;i<this.rows.length;i++){
+		$("#td" + i + "_" + instanceNum).hide();
+		this.permahidden.push("#td" + i + "_" + instanceNum);
+	}
+	this.host.permahidden = this.permahidden;
+
 });
