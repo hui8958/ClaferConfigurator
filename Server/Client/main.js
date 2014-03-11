@@ -96,7 +96,12 @@ Host.method("updateData", function(data){
                     
         }
     } else {
-        $.updateWindowContent("mdOutput", data.consoleOut);
+        for (var i = 0; i < this.modules.length; i++){
+            if (this.modules[i].id == "mdOutput"){
+                this.modules[i].onDataLoaded(data);
+                $.updateWindowContent(this.modules[i].id, this.modules[i].getContent());
+            }
+        }
     }
 });
 
@@ -120,8 +125,15 @@ Host.method("updateInstanceData", function(data, overwrite, consoleOut){
     this.data.instancesXML = new InstanceConverter(this.data.instancesData).convertFromClaferIGOutputToClaferMoo(this.data.instancesData);
     this.data.instancesXML = new InstanceConverter(this.data.instancesXML).convertFromClaferMooOutputToXML(); 
     this.data.consoleOut += consoleOut;
+
+    console.log(this.data)
     this.updateData(this.data);
 
+});
+
+Host.method("updateClaferOnly", function(data){
+    this.data.consoleOut = "";
+    this.data.claferXML = data;
 });
 
 Host.method("consoleUpdate", function(data){

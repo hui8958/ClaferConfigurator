@@ -49,7 +49,7 @@ server.post('/uploads', function(req, res){
 		console.log("moving file from" + oldPath + " to " + upFilePath);
 		fs.rename(oldPath, upFilePath, function (err){
 			if (err) throw err;
-			console.log("proceeding with " + upFilePath)
+			console.log("proceeding with " + upFilePath);
 			var util  = require('util');
 			spawn = require('child_process').spawn;
 			var claferXML = "";
@@ -61,7 +61,7 @@ server.post('/uploads', function(req, res){
 //				console.log("first call complete");
 				if (code != 0){
 					res.writeHead(400, { "Content-Type": "text/html"});
-					res.end("Clafer failed to process the file")
+					res.end("Clafer failed to process the file");
 				}
 				var d = new Date();
 				var obj = { windowKey: req.body.windowKey, tool: null, freshData: "", folder: dlDir, file: upFilePath, lastUsed: d, error: ""};
@@ -90,7 +90,6 @@ server.post('/uploads', function(req, res){
 							} else{
 								processes[i].freshData += data;
 							}
-							processes[i].tool.stdout.removeAllListeners("data");
 						}
 					}
 				});
@@ -110,7 +109,7 @@ server.post('/uploads', function(req, res){
 						}
 					}
 				});
-				tool.on("exit", function(){
+				tool.on("close", function(){
 					for (var i = 0; i<processes.length; i++){
 						if (processes[i].windowKey == req.body.windowKey){
 							console.log(processes[i].error)
@@ -133,6 +132,7 @@ server.get('/Control', function(req, res){
 	var resEnd = false;
 	for (var y = 0; y<this.processes.length; y++){
 		if (processes[y].windowKey == req.query.windowKey){
+			processes[y].tool.stdout.removeAllListeners("data");
 			var d = new Date();
 			processes[y].lastUsed = d;
 			var CurProcess = processes[y];
@@ -149,12 +149,13 @@ server.get('/Control', function(req, res){
 				});
 				break;
 			} else if (req.query.operation == "scope"){
-				CurProcess.tool.stdin.write("i\n", function(){
+				console.log("i " + req.query.superClafer + " " + req.query.increaseScopeBy + "\n");
+				CurProcess.tool.stdin.write("i " + req.query.superClafer + " " + req.query.increaseScopeBy + "\n", function(){
 					CurProcess.tool.stdout.on("data", function (data){
 						if (!resEnd){	
 							res.writeHead(200, { "Content-Type": "text/html"});
 							res.end(data);
-							resEnded = true;
+							resEnd = true;
 						}
 						CurProcess.tool.stdout.removeAllListeners("data");
 					});	
@@ -166,10 +167,22 @@ server.get('/Control', function(req, res){
 	}
 });
 
-server.post('/constraint', function(req, res){
+server.post('/Constraint', function(req, res){
 	for (var i = 0; i<processes.length; i++){
 		if (processes[i].windowKey == req.body.windowKey){
 			fs.readFileSync(processes[i].file)
+		}
+	}
+});
+
+server.get("/unsatisfiable", function(req, res){
+	console.log("asked for unsat");
+	for (var i = 0; i<processes.length; i++){
+		if (processes[i].windowKey == req.query.windowKey){
+			console.log("sending unsat");
+			res.writeHead(200, { "Content-Type": "text/html"});
+			console.log(processes[i].error + processes[i].freshData)
+			res.end(processes[i].error + "=====\n" + processes[i].freshData)
 		}
 	}
 });
@@ -180,7 +193,7 @@ function closeProcess(Key){
 		if (processes[y].windowKey == Key){
 			console.log("closing process");
 			var toDelete = processes[y];
-			toDelete.tool.removeAllListeners("exit");
+			toDelete.tool.removeAllListeners("close");
 			toDelete.tool.stdin.write("q\n");
 			cleanupOldFiles(toDelete.folder);
 			processes.splice(y, 1);
@@ -240,7 +253,13 @@ function ProcessCleaner(){
 		}
 	}, 600000);
 }
-//&end [processCleaner]
+	//&end [processCleaner]
+function ProcessLog(){
+	var log = setInterval(function(){
+		console.log(processes);
+	}, 10000);
+}
+
 /*
  * Catch all. error reporting for unknown routes
  */
@@ -251,6 +270,7 @@ server.use(function(req, res, next){
 server.listen(port);
 console.log('ClaferConfigurator listening on port ' + port);
 ProcessCleaner();
+//ProcessLog();
 
 var getkeys = function(obj){
 		var keys = [];

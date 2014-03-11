@@ -15,7 +15,9 @@ Control.method("getInitContent", function(){
 	var ret = '<form id="ControlForm" enctype="multipart/form-data" method="get" action="/Control" style="display: block">';
 	ret += '<input type="hidden" id="ControlOp" name="operation" value="next" disabled="disabled">';
     ret += '<input type="hidden" id="windowKey" name="windowKey" value="' + this.host.key + '" disabled="disabled">';
-    ret += '<input type="number" class="inputText" id="NumOfNext" placeholder="# to get, default(10)">';
+    ret += '<input type="hidden" id="iScopeBy" name="increaseScopeBy" value="1" disabled="disabled">';
+    ret += '<input type="hidden" id="superClafer" name="superClafer" value="" disabled="disabled">';
+    ret += '<input type="number" class="inputText" id="NumOfNext" placeholder="10">';
 	ret += '<input type="button" class="inputButton" id="next" value="Get Instances" disabled="disabled"><br>';
     ret += '<input type="number" class="inputText" id="SetScope" placeholder="Increase Scope To">';
 	ret += '<input type="button" class="inputButton" id="scope" value="Increase Scope" disabled="disabled"></form>';
@@ -46,9 +48,9 @@ Control.method("onInitRendered", function()
     });
     $("#scope").click(function(){
         $("#ControlOp").val("scope");
-        that.increaseScopeBy = ($("#SetScope").val() - parseInt($("#curScope").text()) - 1);
+        that.increaseScopeBy = ($("#SetScope").val() - parseInt($("#curScope").text()));
+        $("#iScopeBy").val(that.increaseScopeBy)
         if (that.increaseScopeBy >= 0){ //zero indicates that the form must only be submitted once
-            $("#curScope").text(parseInt($("#curScope").text()) + 1);
             $("#ControlForm").submit();
             $("#getProgress").attr("max", that.increaseScopeBy);
             $("#getProgress").attr("value", 1);
@@ -64,6 +66,10 @@ Control.method("onInitRendered", function()
     $('#ControlForm').ajaxForm(options); 
 });
 
+Control.method("onDataLoaded", function(data){
+    $("#superClafer").val((new InstanceProcessor(data.instancesXML)).getInstanceName().replace(/c[1-9]{1,}_/g, ""));
+});
+
 Control.method("beginQuery", function(formData, jqForm, options){
     
     $("#ContWaitingDiv").show();
@@ -72,26 +78,22 @@ Control.method("beginQuery", function(formData, jqForm, options){
 
 Control.method("showResponse", function(responseText, statusText, xhr, $form){
     if ($("#ControlOp").val() == "scope"){
-        $("#curScope").text(parseInt($("#curScope").text()) + 1);
+        $("#curScope").text(parseInt($("#curScope").text()) + this.increaseScopeBy);
         $("#ControlForm").show();
         $("#ContWaitingDiv").hide();
         this.overwrite = true;
         this.host.consoleUpdate(responseText + "<br>");
         this.error = "";
-        if (this.increaseScopeBy){
-            $("#getProgress").attr("value", ($("#getProgress").attr("value") + 1));
-            this.increaseScopeBy--;
-            $("#ControlForm").submit();
-        }
         return;
     }
 
     $("#ControlForm").show();
     $("#ContWaitingDiv").hide();
 
-    if (responseText.indexOf("No more instances found.") != -1){
+    var error = this.checkForCommonErrors(responseText);
+    if (error != ""){
         this.instancesToGet = 0;
-        this.error += "No more instances found. Try increasing the scope.<br>";
+        this.error += error
     }
     else {
 //        console.log(responseText);
@@ -110,7 +112,6 @@ Control.method("showResponse", function(responseText, statusText, xhr, $form){
         this.host.updateInstanceData(this.data, this.overwrite, this.error);
         this.error = "";
         this.data = "";
-        $("#NumOfNext").val('');
         this.overwrite = false
     }
 
@@ -119,4 +120,21 @@ Control.method("showResponse", function(responseText, statusText, xhr, $form){
 Control.method("handleError", function(responseText, statusText, xhr, $form){
     $("#ControlForm").show();
     $("#ContWaitingDiv").hide()
+});
+
+Control.method("checkForCommonErrors", function(instanceOutput){
+    //Unsat
+    if (instanceOutput.indexOf("The following set of constraints cannot be satisfied in the current scope.") != -1){
+        var ret = instanceOutput.replaceAll("\n", "<br>").replaceAll(" ", "&nbsp")
+        return ret;
+    }
+    //No more instances
+    else if (instanceOutput.indexOf("No more instances found.") != -1){
+        var ret = instanceOutput.replaceAll("\n", "<br>").replaceAll(" ", "&nbsp")
+        return ret;
+    }
+    //No common errors
+    else {
+        return "";
+    }
 });
