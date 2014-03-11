@@ -140,7 +140,7 @@ ClaferProcessor.method("getAbstractClaferTree", function(xpathToIdSiblings, id)
 			}
 		}
 		
-		if (id != "clafer")
+		if (id != "clafer") //overflows the console without this
 			console.log("Not found a super clafer specified by the xpath: '" + xpathToIdSiblings + "' " + id);
 		return null;
 	}
@@ -198,6 +198,21 @@ ClaferProcessor.method("recursiveHasChildrenCheck", function(root){
 		for (var i = 0; i<root.subclafers.length; i++){
 			list = list.concat(this.recursiveHasChildrenCheck(root.subclafers[i]));
 		}
+	}
+	return list;
+});
+
+ClaferProcessor.method("getConstraints", function(){
+	var list = []
+	var Bools = this.xmlHelper.queryXML(this.source, "/Module/Declaration[@type='IConstraint']//Exp[@type='IDeclarationParentExp']/Quantifier/@type");
+	var Features = this.xmlHelper.queryXML(this.source, "/Module/Declaration[@type='IConstraint']//BodyParentExp/Exp/Argument/Exp/Id");
+	for (var i = 0; i<Bools.length; i++){
+		var constraint = "[";
+		if (Bools[i].nodeValue == "INo"){
+			constraint += "!";
+		}
+		constraint += Features[i].firstChild.nodeValue.replace(/c[0-9]{1,}_/g, "") + "]";
+		list.push(constraint);
 	}
 	return list;
 });

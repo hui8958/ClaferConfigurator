@@ -4,7 +4,7 @@ function Output(host)
     this.title = "Output";
     
     this.width = 224;
-    this.height = 602;
+    this.height = 270;
     this.posx = 800;
     this.posy = 0;
     
@@ -28,4 +28,8 @@ Output.method("onRendered", function(){
 Output.method("getContent", function()
 {
     return '<text id="output">' + this.content + '</text>';
+});
+
+Output.method("ClearContent", function(){
+    this.content = "";
 });
