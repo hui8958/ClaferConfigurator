@@ -1,8 +1,8 @@
-function tableFilter(tableid, claferXML, instancesXML, host){
+function tableFilter(tableid, claferXML, instancesXML, host, qualities){
 	this.host = host;
 	this.tableid = "#" + tableid;
 	this.hidden = [];
-	this.processor = new ClaferProcessor(claferXML);
+	this.processor = new ClaferProcessor(claferXML, qualities);
 	this.instanceProcessor = new InstanceProcessor(instancesXML);
 	this.closedFeatures = [];
 }
@@ -65,8 +65,8 @@ tableFilter.method("hideRowByName", function (name){
 });
 
 tableFilter.method("closeFeature", function (feature){
-	var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-	var root = this.processor.getAbstractClaferTree("/Module/Declaration/UniqueId", instanceSuperClafer);
+	var instanceClaferName = this.instanceProcessor.getInstanceName();
+	var root = this.processor.getAbstractClaferTree("/Module/Declaration/UniqueId", instanceClaferName);
 	
 	root = this.findNodeInTree(root, feature)
 

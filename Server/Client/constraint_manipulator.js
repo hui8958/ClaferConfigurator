@@ -25,11 +25,25 @@ ConstraintManipulator.method("getInitContent", function(){
 });
 
 ConstraintManipulator.method("onInitRendered", function(){ 
+	$("#SaveConstraints").hide(); // save constraints form removed until further notice
     var that = this;
     $("#Save").click(function(){
     	$("#constraintCont").val(that.getClaferConstraints(false));
-    	$("#instanceName").val(that.instanceProcessor.getInstanceName().replace(/c[0-9]_/, "") + " : " + that.instanceProcessor.getInstanceSuperClafer().replace(/c[0-9]_/, ""));
+    	$("#instanceName").val(that.instanceProcessor.getInstanceName().replace(/c[0-9]{1,}_/g, "") + " : " + that.instanceProcessor.getInstanceSuperClafer().replace(/c[0-9]{1,}_/g, ""));
     });
+
+    $("#constraintDisplay").click(function(){
+    	if (document.selection) {
+            var range = document.body.createTextRange();
+            range.moveToElementText(document.getElementById("constraintDisplay"));
+            range.select();
+        } else if (window.getSelection) {
+            var range = document.createRange();
+            range.selectNode(document.getElementById("constraintDisplay"));
+            window.getSelection().addRange(range);
+        }
+    });
+
 });
 
 ConstraintManipulator.method("onDataLoaded", function(data){
@@ -71,12 +85,12 @@ ConstraintManipulator.method("getClaferConstraints", function(includeOriginalCon
 
 	var constraints = this.getConstraints();
 	for (i=0; i<constraints.length; i++){
-		ret += "\n[";
+		ret += "\n[ ";
 		if (!this.constraints[constraints[i]]){
-			ret += "!";
+			ret += "no ";
 		}
 		ret += constraints[i];
-		ret += "]";
+		ret += " ]";
 	}
 	console.log(ret)
 	return ret;

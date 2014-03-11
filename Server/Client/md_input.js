@@ -38,7 +38,9 @@ Input.method("onInitRendered", function()
 //    unsatOpt.error = function(ErrorObject, statusText, xhr, $form){};
     unsatOpt.success = this.unsatReturn.bind(this); //problem in ie
     $("#getUnsat").ajaxForm(unsatOpt);
-
+//    $("#InputForm").submit(function(){ //Need to pull quality attributes out of file before submitting
+//        var input = getElementById()
+//    })
 });
 
 Input.method("beginQuery", function(formData, jqForm, options){
@@ -77,6 +79,8 @@ Input.method("showResponse", function(responseText, statusText, xhr, $form){
     }
 
     data[1] = data[1].replaceAll("claferIG> ", "");  
+    data[2] = data[2].replace(/[ \r]/g, "").replace(/:[A-z0-9]{1,}/g, "");
+    data[2] = data[2].split("\n");
 
     $('#waitText').hide();
     $('#InputForm').show();

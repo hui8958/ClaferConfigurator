@@ -23,10 +23,10 @@ function ComparisonTable(host)
 
 ComparisonTable.method("onDataLoaded", function(data){
     this.instanceProcessor = new InstanceProcessor(data.instancesXML);
-    this.processor = new ClaferProcessor(data.claferXML);
+    this.processor = new ClaferProcessor(data.claferXML, data.qualities);
     this.abstractClaferOutput = "";    
     this.toggled = false;
-    this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this)
+    this.filter = new tableFilter("comparison", data.claferXML, data.instancesXML, this, data.qualities)
 
     this.dataTable = this.getDataTable();   
     
@@ -69,6 +69,28 @@ ComparisonTable.method("onRendered", function(){
             this.toggleDistinct(); //one to reapply it
         }
     }).css("cursor", "pointer");
+
+//  Add remove buttons to instances
+    var instances = $("#comparison #r0").find(".td_instance");
+    for (i=0; i<$(instances).length; i++){
+        $(instances[i]).prepend('<image id="rem' + $(instances[i]).text() + '" src="images/remove.png" alt="remove">')
+        var buttonId = "#rem" + $(instances[i]).text();
+        $(buttonId).attr("name", $(instances[i]).text());
+        $(buttonId).click(function(){
+            that.removeInstance($(this).attr("name"));
+        });
+        $(buttonId).css("float", "left");
+        $(buttonId).css("vertical-align", "middle");
+        $(buttonId).css("cursor", "pointer");
+        
+        $(buttonId).hover(
+        function () {
+            $(this).attr("src", "images/removeMouseOver.png");
+        }, 
+        function () {
+            $(this).attr("src", "images/remove.png");
+        });      
+    }
 
 //************************* Most of the following is to get proper formatting on the table  *******************
 
@@ -160,17 +182,17 @@ ComparisonTable.method("onRendered", function(){
             $("#r" + i + " .td_abstract").prepend('<image id="r' + i + 'box" src="images/checkbox_empty.bmp" class="maybe">');
             $("#r" + i + "box").click(function(){
                 if (this.src.indexOf("images/checkbox_empty.bmp") != -1){
-                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z]/g, ''), 1)
+                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 1)
                     this.src = "images/checkbox_ticked.bmp";
                     $(this).parent().parent().attr("FilterStatus", "require");
                     that.filter.filterContent();
                 } else if (this.src.indexOf("images/checkbox_ticked.bmp") != -1){
-                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z]/g, ''), -1)
+                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), -1)
                     this.src = "images/checkbox_x.bmp";
                     $(this).parent().parent().attr("FilterStatus", "exclude");
                     that.filter.filterContent();
                 } else {
-                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z]/g, ''), 0)
+                    that.changeConstraint($(this).parent().text().replaceAll(/[^A-z0-9]/g, ''), 0)
                     this.src = "images/checkbox_empty.bmp";
                     $(this).parent().parent().attr("FilterStatus", "none");
                     that.filter.filterContent();
@@ -186,8 +208,8 @@ ComparisonTable.method("onRendered", function(){
     }
   //&end [contentFilter]
 //  Add collapse buttons for features with children
-    var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
-    var abstractClaferTree = this.processor.getAbstractClaferTree("/Module/Declaration/UniqueId", instanceSuperClafer);
+    var instanceClaferName = this.instanceProcessor.getInstanceName();
+    var abstractClaferTree = this.processor.getAbstractClaferTree("/Module/Declaration/UniqueId", instanceClaferName);
     var hasChild = this.processor.getFeaturesWithChildren(abstractClaferTree)
     i = 1;
     row = $("#r" + i);
@@ -303,9 +325,9 @@ ComparisonTable.method("traverse", function(clafer, level)
 ComparisonTable.method("getDataTable", function()
 {
 	var instanceCount = this.instanceProcessor.getInstanceCount();
-	var instanceSuperClafer = this.instanceProcessor.getInstanceSuperClafer();
+	var instanceClaferName = this.instanceProcessor.getInstanceName();
 //	alert(instanceSuperClafer);
-	var abstractClaferTree = this.processor.getAbstractClaferTree("/Module/Declaration/UniqueId", instanceSuperClafer);
+	var abstractClaferTree = this.processor.getAbstractClaferTree("/Module/Declaration/UniqueId", instanceClaferName);
     var EMfeatures = this.processor.getEffectivelyMandatoryFeatures(abstractClaferTree)
 //    console.log(abstractClaferTree)	;
 //	alert(abstractClaferTree.subclafers[0].subclafers.length);
@@ -541,6 +563,10 @@ ComparisonTable.method("rowSort", function(rowText){
     }
 });
 //&end [sorting]
+ComparisonTable.method("removeInstance", function(instanceNum){
+    host.removeInstance(parseInt(instanceNum), this.instanceProcessor.getInstanceName());
+})
+
 ComparisonTable.method("getInitContent", function()
 {
 	return '';	   
