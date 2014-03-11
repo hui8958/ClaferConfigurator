@@ -8,12 +8,22 @@ ClaferConfigurator
 		JSClass
         views
 			featureAndQualityMatrix
+				contentFilter
+				searchBar
+				sorting
+					sortingByQuality
+					sortingByID
 			input
 				handleError
 			output
 			control
 		instanceProcessor
 		claferProcessor
+		ListVisualizer
 		dataTable
+			subsetByProducts
+			subsetByFeatures
+			makeAggregatedFeature
+			getMissingProductsInCommonData
 	processManagement
 		processCleaner

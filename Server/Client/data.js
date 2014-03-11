@@ -8,7 +8,7 @@ function DataTable ()
     this.title = "";                 // instance super clafer
 
 }
-
+//&begin [subsetByProducts]
 DataTable.method("subsetByProducts", function(arrayProducts)
 {
     var result = new DataTable();
@@ -84,7 +84,8 @@ DataTable.method("subsetByProducts", function(arrayProducts)
     
     return result;
 });
-
+//&end [subsetByProducts]
+//&begin [subsetByFeatures]
 DataTable.method("subsetByFeatures", function(arrayFeatures)
 {
     var result = new DataTable();
@@ -157,12 +158,13 @@ DataTable.method("subsetByFeatures", function(arrayFeatures)
     return result;
 
 });
-
+//&end [subsetByFeatures]
+//&begin [makeAggregatedFeature]
 DataTable.method("makeAggregatedFeature", function(s)
 {
     return s + " (mean)";
 });
-
+//&end [makeAggregatedFeature]
 
 DataTable.method("getCommon", function(needAggregate)
 {
@@ -224,7 +226,7 @@ DataTable.method("getCommon", function(needAggregate)
 
     return result;
 });
-
+//&begin [getMissingProductsInCommonData]
 DataTable.method("getMissingProductsInCommonData", function(commonData, productList)
 {
     var commonProducts = new Array();
@@ -272,7 +274,7 @@ DataTable.method("getMissingProductsInCommonData", function(commonData, productL
     
     return result;
 });
-
+//&end [getMissingProductsInCommonData]
 DataTable.method("toSetOfFeatures", function()
 {
     var result = new JS.Set(this.features);
