@@ -69,7 +69,7 @@ ComparisonTable.method("onRendered", function(){
             this.toggleDistinct(); //one to reapply it
         }
     }).css("cursor", "pointer");
-
+//&begin [removeInstance]
 //  Add remove buttons to instances
     var instances = $("#comparison #r0").find(".td_instance");
     for (i=0; i<$(instances).length; i++){
@@ -91,7 +91,7 @@ ComparisonTable.method("onRendered", function(){
             $(this).attr("src", "images/remove.png");
         });      
     }
-
+//&end [removeInstance]
 //************************* Most of the following is to get proper formatting on the table  *******************
 
 // Move headers into new div
@@ -563,10 +563,11 @@ ComparisonTable.method("rowSort", function(rowText){
     }
 });
 //&end [sorting]
+//&begin [removeInstance]
 ComparisonTable.method("removeInstance", function(instanceNum){
     host.removeInstance(parseInt(instanceNum), this.instanceProcessor.getInstanceName());
 })
-
+//&end [removeInstance]
 ComparisonTable.method("getInitContent", function()
 {
 	return '';	   

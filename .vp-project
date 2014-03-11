@@ -13,6 +13,7 @@ ClaferConfigurator
 				sorting
 					sortingByQuality
 					sortingByID
+				removeInstance
 			input
 				handleError
 			output
