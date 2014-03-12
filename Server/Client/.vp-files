@@ -22,5 +22,5 @@ ptable.js data.js
 dataTable
 plist.js
 ListVisualizer
-constraint_manipulator.js
+md_constraints.js
 constraints
