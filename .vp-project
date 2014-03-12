@@ -27,5 +27,6 @@ ClaferConfigurator
 			subsetByFeatures
 			makeAggregatedFeature
 			getMissingProductsInCommonData
+		helpSystem
 	processManagement
 		processCleaner
