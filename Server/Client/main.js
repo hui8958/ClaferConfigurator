@@ -73,12 +73,22 @@ function Host(modules)
             $.updateWindowContent(this.modules[i].id, this.modules[i].getInitContent());
 
         if (this.modules[i].onInitRendered)
-            this.modules[i].onInitRendered();        
+            this.modules[i].onInitRendered();     
+
+        var helpButton = this.getHelpButton(this.modules[i].title);
+        $("#" + this.modules[i].id + " .window-titleBar").append(helpButton);   
     }
 
-    $("body").prepend(this.helpGetter.getInitial());
-    this.helpGetter.setListeners();
-   
+    var displayHelp=getCookie("startHelp")
+    if(displayHelp==null){
+        $("body").prepend(this.helpGetter.getInitial());
+        this.helpGetter.setListeners();
+    }else{
+        $("body").prepend(this.helpGetter.getInitial());
+        this.helpGetter.setListeners();
+        $("#help").hide();
+        $(".fadeOverlay").hide();
+    }
 }
 
 Host.method("updateData", function(data){
@@ -147,15 +157,6 @@ Host.method("consoleUpdate", function(data){
     console.log(data);
     this.data.consoleOut = data;
     this.updateData(this.data);
-});
-
-Host.method("ClearOutput", function(data){
-    for (var i = 0; i < this.modules.length; i++){
-        if (this.modules[i].id == "mdOutput"){
-            this.modules[i].ClearContent();
-            $.updateWindowContent(this.modules[i].id, this.modules[i].getContent());
-        }
-    } 
 });
 
 Host.method("ClearOutput", function(data){
