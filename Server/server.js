@@ -297,7 +297,7 @@ function ProcessLog(){
 server.use(function(req, res, next){
   res.send(404, "Sorry can't find that!");
 });
-
+//&begin [checkingDependencies]
 var dependency_count = 3; // the number of tools to be checked before the Visualizer starts
 console.log('=========================================');
 console.log('| Clafer Configurator v0.3.4.20-9-2013  |');
@@ -370,3 +370,4 @@ var getkeys = function(obj){
 		}
 		return keys;
 }
+//&end [checkingDependencies]

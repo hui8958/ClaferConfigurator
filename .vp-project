@@ -3,6 +3,7 @@ ClaferConfigurator
         backends
             ClaferIG
 		cleanOldFiles
+		checkingDependencies
     client
         jquery
 		JSClass
