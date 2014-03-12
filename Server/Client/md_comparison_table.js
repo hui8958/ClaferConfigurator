@@ -577,6 +577,9 @@ ComparisonTable.method("removeInstance", function(instanceNum){
 //&end [removeInstance]
 ComparisonTable.method("getInitContent", function()
 {
+    helpButton = this.host.getHelpButton(this.title);
+    $("#" + this.id + " .window-titleBar").append(helpButton);
+    
 	return '';	   
 });
 
