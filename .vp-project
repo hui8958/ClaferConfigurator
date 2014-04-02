@@ -16,6 +16,7 @@ ClaferConfigurator
 		JSClass
         views
 			featureAndQualityMatrix
+				expandCollapse
 				contentFilter
 				searchBar
 				sorting
@@ -23,6 +24,7 @@ ClaferConfigurator
 					sortingByID
 				removeInstance
 			input
+				instanceProcessing
 				handleError
 			output
 			control
