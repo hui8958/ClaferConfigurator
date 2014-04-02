@@ -145,6 +145,7 @@ server.get('/saveformat', fileMiddleware, function(req, res) {
 //-------------------------------------------------
 
 /* Controlling Instance Generators */
+//&begin [control]
 server.post('/control', commandMiddleware, function(req, res)
 {
     core.logSpecific("Control: Enter", req.body.windowKey);
@@ -262,10 +263,11 @@ server.post('/control', commandMiddleware, function(req, res)
             });
 
 
+			//&begin [scopeInteraction]
             // if the backend supports production of the scope file, then send this command
             // the command will be handled after the initial processing in any case
 
-
+			
             if (backend.scope_options.clafer_scope_list)
             {
                 process.tool.stdin.write(backend.scope_options.clafer_scope_list.command);
@@ -278,6 +280,7 @@ server.post('/control', commandMiddleware, function(req, res)
 
             res.writeHead(200, { "Content-Type": "text/html"});
             res.end("started");
+			//&end [scopeInteraction]
 
         }
     }
@@ -289,6 +292,7 @@ server.post('/control', commandMiddleware, function(req, res)
         res.writeHead(200, { "Content-Type": "text/html"});
         res.end("stopped");
     }
+	//&begin [scopeInteraction]
     else if (req.body.operation == "setGlobalScope") // "Set Global Scope" operation
     {
         core.logSpecific("Control: setGlobalScope", req.body.windowKey);
@@ -327,7 +331,9 @@ server.post('/control', commandMiddleware, function(req, res)
 
         res.writeHead(200, { "Content-Type": "text/html"});
         res.end("global_scope_set");
+		
     }
+//&end [scopeInteraction]
     else if (req.body.operation == "setIndividualScope") // "Set Clafer Scope" operation
     {
         core.logSpecific("Control: setIndividualScope", req.body.windowKey);
@@ -509,12 +515,14 @@ server.post('/control', commandMiddleware, function(req, res)
         res.end("operation");
     }
 });
+//&end [control]
 
 
 /*
  * "Compile" command
  * This is related to any time of submissions done using the Input view: compiling a file, example or text, etc.
  */
+// &begin fileUpload
 server.post('/upload', commandMiddleware, function(req, res, next) 
 {
     lib.handleUploads(req, res, next, fileReady);
@@ -530,6 +538,7 @@ server.post('/upload', commandMiddleware, function(req, res, next)
 
         var key = req.body.windowKey;
 
+		//&begin [fileProcessing]
         // read the contents of the uploaded file
         fs.readFile(uploadedFilePath + ".cfr", function (err, data) {
 
@@ -590,10 +599,13 @@ server.post('/upload', commandMiddleware, function(req, res, next)
 
             res.writeHead(200, { "Content-Type": "text/html"});
             res.end("OK"); // we have to return a response right a way to avoid confusion.               
+		// &end [fileProcessing]
         });
     }
 });
 
+//&end fileUpload
+	// &begin [polling]
 /* =============================================== */
 // POLLING Requests
 /* ------------------------------------------*/
@@ -734,6 +746,7 @@ server.post('/poll', pollingMiddleware, function(req, res, next)
             }
         }
     }
+	//&begin [cancellation]
     else // if it is cancel
     {
         process.toKill = true;
@@ -753,6 +766,7 @@ server.post('/poll', pollingMiddleware, function(req, res, next)
         res.end(JSON.stringify(jsonObj));
 
         core.logSpecific("Cancelled: " + process.toKill, req.body.windowKey);
+		//&end [cancellation]
     }
     
     // clearing part
@@ -761,6 +775,7 @@ server.post('/poll', pollingMiddleware, function(req, res, next)
     
 });
 
+//&end [polling]
 /*
  * Catch all the rest. Error reporting for unknown routes
  */

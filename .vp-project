@@ -2,8 +2,15 @@ ClaferConfigurator
     server
         backends
             ClaferIG
+		fileUpload
+			handleEmptyFile
+			fileProcessing
+				multipleFormatOutput
+			compileErrorHandling
+		uploadFromTextEditor
 		cleanOldFiles
 		checkingDependencies
+		urlUploading
     client
         jquery
 		JSClass
@@ -19,6 +26,7 @@ ClaferConfigurator
 				handleError
 			output
 			control
+				scopeInteraction
 			constraints
 		instanceProcessor
 		claferProcessor
@@ -31,3 +39,8 @@ ClaferConfigurator
 		helpSystem
 	processManagement
 		processCleaner
+		polling
+        timeout
+			inactivityTimeout
+			executionTimeout
+        cancellation
