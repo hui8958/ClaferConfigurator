@@ -62,14 +62,14 @@ Worker.method("updateInstanceData", function()
     this.data.instancesXML = new InstanceConverter(this.data.instancesData).convertFromClaferIGOutputToClaferMoo(this.data.instancesData);
     this.data.instancesXML = new InstanceConverter(this.data.instancesXML).convertFromClaferMooOutputToXML(); 
 
-    if (this.instancesCounter < this.instancesToGet)
+    if (this.instancesCounter == this.instancesToGet)
     {
-        this.instancesCounter = this.instancesCounter + 1;
-        $("#" + this.host.storage.backendId + "-next_instance").click(); // resuming the generation process
+        this.onGenerationSuccess();
     } 
     else 
     {
-        this.onGenerationSuccess();
+        this.instancesCounter = this.instancesCounter + 1;
+        $("#" + this.host.storage.backendId + "-next_instance").click(); // resuming the generation process
     }        
 
 });
@@ -116,15 +116,24 @@ Worker.method("onGenerationComplete", function(){
         this.host.print("Generated " + this.instancesCounter + " out of " + this.instancesToGet + " instances\n");        
     }
 
-    alert(this.data.instancesData);    
+//    alert(this.data.instancesData);    
+    console.log(this.data);
+    var matrixModule = this.host.findModule("mdFeatureQualityMatrix");
+    var constraintModule = this.host.findModule("mdConstraints");
+
+    matrixModule.onDataLoaded(this.data);
+    constraintModule.onDataLoaded(this.data);
+    $.updateWindowContent(matrixModule.id, matrixModule.getContent());
+    matrixModule.onRendered();
+
 });
 
-Worker.method("initializeGeneration", function(){
+Worker.method("initializeGeneration", function(decrement){
     if ($("#instanceGenerationState").val() == "none")
     {
         $("#instanceGenerationState").val("running");
-        this.instancesToGet = $("#instancesToGet").val();        
-        this.instancesCounter = 0; 
+        this.instancesToGet = $("#instancesToGet").val();       
+        this.instancesCounter = decrement; // the first instance is already present 
         this.host.print("Trying to generate " + this.instancesToGet + " instances...\n");        
     }
 });

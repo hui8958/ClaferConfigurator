@@ -4,8 +4,8 @@ function getConfiguration()
     modules.push({"name": "Input", "configuration": 
     	{
     		"layout": {
-    			"width": (window.parent.innerWidth-20) * 0.38,
-    			"height": 180,
+    			"width": (window.parent.innerWidth-40) * 0.38,
+    			"height": 125,
     			"posx": 0,
     			"posy": 0
     		},
@@ -93,12 +93,14 @@ function getConfiguration()
                         {
                             var xml = responseObject.compiled_formats[i].result;
 
+                            xml = convertHtmlTags(xml);
+
                             xml = xml.replaceAll('<?xml version="1.0"?>', '');
+                            xml = xml.replaceAll(' xmlns="http://clafer.org/ir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cl="http://clafer.org/ir" xsi:schemalocation="http://clafer.org/ir https://github.com/gsdlab/clafer/blob/master/src/ClaferIR.xsd"', '');
                             xml = xml.replaceAll('cl:', '');
                             xml = xml.replaceAll('xsi:', '');
-                            xml = xml.replaceAll(' xmlns="http://clafer.org/ir" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cl="http://clafer.org/ir" schemaLocation="http://clafer.org/ir https://github.com/gsdlab/clafer/blob/master/src/ClaferIR.xsd"', '');
 
-                            module.host.storage.worker.data.modelXML = xml;
+                            module.host.storage.worker.data.claferXML = xml;
                             break;
                         }                        
                     }
@@ -106,7 +108,7 @@ function getConfiguration()
 
                 if (responseObject.qualities)
                 {
-                    module.host.storage.worker.data.modelQualities = qualities;    
+                    module.host.storage.worker.data.qualities = qualities;    
                 }                
 
                 module.host.print("Compiler> " + responseObject.message + "\n");
@@ -132,7 +134,7 @@ function getConfiguration()
 
             "layout": {
                 "width": (window.parent.innerWidth+65) * 0.38,
-                "height": 180,
+                "height": 125,
                 "posx": (window.parent.innerWidth-40) * (1 - 0.38),
                 "posy": 0
             }
@@ -144,7 +146,7 @@ function getConfiguration()
     {
             "layout": {
                 "width": (window.parent.innerWidth-40) * (0.24),
-                "height": 180,
+                "height": 125,
                 "posx": (window.parent.innerWidth-40) * 0.38,
                 "posy": 0
             },
@@ -165,7 +167,7 @@ function getConfiguration()
             "onStarted": function (module)
             {
                 module.host.print("ClaferIDE> Running the chosen instance generator...\n");            
-                module.host.storage.worker.initializeGeneration(); 
+                module.host.storage.worker.initializeGeneration(1); 
             },
             "onStopped": function (module)
             {
@@ -208,7 +210,7 @@ function getConfiguration()
             {
                 if (id.indexOf("next_instance") != -1) // it's a next instance button
                 {
-                    module.host.storage.worker.initializeGeneration();   
+                    module.host.storage.worker.initializeGeneration(0);   
                 }
             }    
 
@@ -220,9 +222,9 @@ function getConfiguration()
 
             "layout": {
                 "width": window.parent.innerWidth - 20 - 230,
-                "height": window.parent.innerHeight - 60 - 220,
+                "height": window.parent.innerHeight - 60 - 165,
                 "posx": 0,
-                "posy": 220
+                "posy": 165
             },
 
             "buttonsForRemoval": true,
@@ -230,6 +232,8 @@ function getConfiguration()
 
             "onReset": function(module)
             {
+                var constraintModule = module.host.findModule("mdConstraints");
+                constraintModule.reset();
             },
             "onFeatureExpanded": function(module, feature)
             {
@@ -239,6 +243,17 @@ function getConfiguration()
             },          
             "onFeatureCheckedStateChange": function(module, feature, require)
             {
+                var constraintModule = module.host.findModule("mdConstraints");
+
+                if (require == 1){
+                    constraintModule.addConstraint(feature, true);
+                } else if (require == 0){
+                    constraintModule.removeConstraint(feature);
+                } else if (require == -1){
+                    constraintModule.addConstraint(feature, false);
+                } else {
+                    alert("an error occured while adding a constraint");
+                }
             },
             "onInstanceRemove" : function(module, num)
             {
@@ -251,9 +266,9 @@ function getConfiguration()
 
             "layout": {
                 "width": 250,
-                "height": window.parent.innerHeight - 60 - 220,
+                "height": window.parent.innerHeight - 60 - 165,
                 "posx": window.parent.innerWidth - 20 - 230,
-                "posy": 220
+                "posy": 165
             }
         }});
 
