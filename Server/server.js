@@ -144,9 +144,77 @@ server.get('/saveformat', /*fileMiddleware,*/ function(req, res) {
 //  Command Requests
 //-------------------------------------------------
 
+function requestInstances(process, req)
+{
+    var backend = core.getBackend(req.body.backend);
+    if (!backend)
+    {
+        core.logSpecific("Error: Backend was not found", req.body.windowKey);
+        return false;
+    }
+
+    var instancesToGet = req.body.operation_arg1;
+
+    core.logSpecific(backend.id + " " + instancesToGet, req.body.windowKey);
+
+    var operationId = "next_instance";
+    var operation = null;
+    // looking for a backend
+
+    // looking for the operation
+    var found = false;
+
+    for (var j = 0; j < backend.control_buttons.length; j++)
+    {
+        if (backend.control_buttons[j].id == operationId)
+        {
+            operation = backend.control_buttons[j];
+            found = true;
+            break;
+        }
+    }
+
+    if (!found)
+    {
+        core.logSpecific("Error: Required operation was not found", req.body.windowKey);
+        return false;
+    }
+
+    core.logSpecific(backend.id + " ==> " + operation.id, req.body.windowKey);
+
+    for (var i = 0; i < instancesToGet; i++)
+    {
+        process.tool.stdin.write(operation.command);
+    }    
+
+    return true;
+}
+
 /* Controlling Instance Generators */
 server.post('/control', /*commandMiddleware, */function(req, res)
 {
+
+    var settings = new Object();
+    settings.onData = function(data){
+        var process = core.getProcess(req.body.windowKey);
+        if (process != null)
+        {
+            if (!process.completed)
+            {
+                process.freshData += data;
+            }
+        }
+    };
+    settings.onError = function(data){
+        var process = core.getProcess(req.body.windowKey);
+        if (process != null)
+        {
+            if (!process.completed)
+            {
+                process.freshData += data;
+            }
+        }
+    };
 
     var process = core.getProcess(req.body.windowKey);
     if (process == null)
@@ -156,13 +224,29 @@ server.post('/control', /*commandMiddleware, */function(req, res)
         return;
     }
 
-    if (req.body.operation == "getInstances") // "Run" operation
+    if (req.body.operation == "getInstances") // "getInstances" operation
     {
         core.logSpecific("Control: GetInstances", req.body.windowKey);
+        if (requestInstances(process, req))
+        {
+            res.writeHead(200, { "Content-Type": "text/html"});
+            res.end("instances_got");
+        }
+        else
+        {
+            res.writeHead(400, { "Content-Type": "text/html"});
+            res.end("failed_generating_instances");                           
+        }
     }
     else
     {
-        lib.handleControlRequest(req, res);
+        if (lib.handleControlRequest(req, res, settings))
+        {
+            if (req.body.operation == "run") // just running
+            {
+                requestInstances(process, req);
+            }
+        }
     }
 });
 
@@ -234,6 +318,8 @@ server.post('/upload', /*commandMiddleware,*/ function(req, res, next)
             var genericArgs = [ss, uploadedFilePath + ".cfr", "--skip-goals", "--check-afm"];
 
             var process = core.getProcess(req.body.windowKey);
+
+            process.ss = ss; // saving the scope strategy
 
             /* getting quality attributes */ 
 

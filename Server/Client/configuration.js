@@ -17,13 +17,13 @@ function getConfiguration()
             "file_extensions": [
                 {
                     "ext": ".cfr", 
-                    "button_file_caption": "Configure",
-                    "button_example_caption": "Configure",
-                    "button_editor_caption": "Configure",
+                    "button_file_caption": "Compile",
+                    "button_example_caption": "Compile",
+                    "button_editor_caption": "Compile",
 
-                    "button_file_tooltip": "Configure tooltip",
-                    "button_example_tooltip": "Configure tooltip",
-                    "button_editor_tooltip": "Configure tooltip"
+                    "button_file_tooltip": "Compile the Clafer file selected on your machine",
+                    "button_example_tooltip": "Compile the example chosen from the example list",
+                    "button_editor_tooltip": "Compile the code in the editor below"
                 }
             ],
 
@@ -108,7 +108,7 @@ function getConfiguration()
 
                 if (responseObject.qualities)
                 {
-                    module.host.storage.worker.data.qualities = qualities;    
+                    module.host.storage.worker.data.qualities = responseObject.qualities;    
                 }                
 
                 module.host.print("Compiler> " + responseObject.message + "\n");
@@ -166,6 +166,8 @@ function getConfiguration()
             },
             "onStart": function (module)
             {
+                $("#ControlOpArg1").val($ ("#instancesToGet").val() - 1); // request (instancesToGet - 1) instances
+                module.host.storage.worker.initializeGeneration(); 
                 return true;                
             },
             "onStop": function (module)
@@ -175,7 +177,6 @@ function getConfiguration()
             "onStarted": function (module)
             {
                 module.host.print("ClaferConfigurator> Running the chosen instance generator...\n");            
-                module.host.storage.worker.initializeGeneration(1); 
             },
             "onStopped": function (module)
             {
@@ -233,7 +234,23 @@ function getConfiguration()
             },
             "onControlButtonClick": function(module, id)
             {
-            }    
+                var backendId = $("#BackendId").val();
+                var parts = id.split("-");
+                if (parts[1] == "reload") // reload
+                {
+                    module.host.storage.worker.resetGeneration(); 
+                    module.host.storage.worker.refreshViews();
+                    module.host.print("Instances are reset.\n");        
+                }
+            },
+            "onCustomEvent": function(module, response)
+            {
+                if (response == "instances_got")
+                {
+                    module.host.print("ClaferConfigurator> Generating instances...\n");            
+                    module.host.storage.worker.initializeGeneration(); 
+                }
+            },               
 
         }});
 
@@ -250,6 +267,7 @@ function getConfiguration()
 
             "buttonsForRemoval": true,
             "instancesSelectable": false,
+            "useInstanceName": true,
 
             "onReset": function(module)
             {
