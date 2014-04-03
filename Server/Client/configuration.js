@@ -74,10 +74,10 @@ function getConfiguration()
             },
 
             "onPoll" : function(module, responseObject){
-                if (responseObject.args)
-                {
-                    module.host.print("ClaferConfigurator> clafer " + responseObject.args + "\n");
-                }
+//                if (responseObject.args)
+//                {
+//                    module.host.print("ClaferConfigurator> clafer " + responseObject.args + "\n");
+//                }
             },
             "onCompleted" : function(module, responseObject){               
                 if (responseObject.model != "")
@@ -167,6 +167,8 @@ function getConfiguration()
             "onStart": function (module)
             {
                 $("#ControlOpArg1").val($ ("#instancesToGet").val() - 1); // request (instancesToGet - 1) instances
+                module.host.storage.worker.resetGeneration(); 
+                module.host.storage.worker.refreshViews();
                 module.host.storage.worker.initializeGeneration(); 
                 return true;                
             },
@@ -212,29 +214,23 @@ function getConfiguration()
             "onCompleted": function (module, responseObject){
                 module.host.print("ClaferConfigurator> The instance generator is exited.\n");
             },
-            "onBackendChange": function (module, newBackendId)
+            "onBackendChange": function (module, newBackend)
             {
-                module.host.storage.backendId = newBackendId;
+                module.host.storage.backend = newBackend;
                 $("#instancesToGet").remove();
                 $("#getInstances").remove();
-                $("#" + newBackendId + "-next_instance").hide();
-                $("#" + newBackendId + "_buttons").prepend('<button id="getInstances">Get Instances</button>');
-                $("#" + newBackendId + "_buttons").prepend('<input class="scopeInput" type="text" value="10" name="instancesToGet" id="instancesToGet"/>');
+                $("#" + newBackend.id + "-next_instance").hide();
+                $("#" + newBackend.id + "_buttons").prepend('<button id="getInstances">Get Instances</button>');
+                $("#" + newBackend.id + "_buttons").prepend('<input class="scopeInput" type="text" value="10" name="instancesToGet" id="instancesToGet"/>');
      
                 $("#getInstances").click(function()
                 {
                     $("#ControlOp").val("getInstances");
                     $("#ControlOpArg1").val($ ("#instancesToGet").val());
                 });
-
-                if (module.host.storage.worker)
-                {
-                    module.host.storage.worker.selectedBackendId = newBackendId;
-                }
             },
             "onControlButtonClick": function(module, id)
             {
-                var backendId = $("#BackendId").val();
                 var parts = id.split("-");
                 if (parts[1] == "reload") // reload
                 {
