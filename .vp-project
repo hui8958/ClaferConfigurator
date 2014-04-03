@@ -11,6 +11,8 @@ ClaferConfigurator
 		cleanOldFiles
 		checkingDependencies
 		urlUploading
+		handleControlRequest
+			scopeInteraction
     client
         jquery
 		JSClass
@@ -28,7 +30,6 @@ ClaferConfigurator
 				handleError
 			output
 			control
-				scopeInteraction
 			constraints
 		instanceProcessor
 		claferProcessor
